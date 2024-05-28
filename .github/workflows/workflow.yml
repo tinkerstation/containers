@@ -6,7 +6,7 @@ permissions:
   contents: 'read'
 
 jobs:
-  build_postfix:
+  postfix:
     uses: tinkerstation/containers/.github/workflows/reusable-workflow.yml@main
     with:
       name: postfix

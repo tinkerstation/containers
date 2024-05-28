@@ -15,8 +15,8 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: [self-hosted, gp_ubuntu]
-    name: build ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    name: build and push image
 
     steps:
     - name: checkout
@@ -38,11 +38,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: ${{ inputs.context-path }}
-        file: ${{ inputs.dockerfile-path }}
-        tags: ${{ steps.properties.outputs.repo }}/${{ steps.properties.outputs.image }}:${{ steps.properties.outputs.tag }}
-        push: true
-        outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=My multi-arch image
+    - name: Build and Push Docker Image
+      run: |
+        docker build ${{ inputs.context-path }} --tag ghcr.io/${{ steps.properties.outputs.repo }}/${{ steps.properties.outputs.image }}:${{ steps.properties.outputs.tag }} -f ${{ inputs.dockerfile-path }}
+        docker push ghcr.io/${{ steps.properties.outputs.repo }}/${{ steps.properties.outputs.image }}:${{ steps.properties.outputs.tag }}
