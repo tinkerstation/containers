@@ -22,9 +22,9 @@ jobs:
     - name: checkout
       uses: actions/checkout@v4
       
-    - name: properties from ${{ inputs.image_directory }}
+    - name: properties from ${{ inputs.context-path }}
       shell: bash
-      working-directory: ${{ inputs.image_directory }}
+      working-directory: ${{ inputs.context-path }}
       id: properties
       run: |
         echo "image=$(sed -n -e '/^image/ s/.*\: *//p'  ${{ inputs.dockerfile-path }}" >> $GITHUB_OUTPUT
