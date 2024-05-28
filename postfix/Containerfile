@@ -1,0 +1,23 @@
+FROM ubuntu:latest
+ENV DEBIAN_FRONTEND noninteractive
+LABEL org.opencontainers.image.source=https://github.com/tinkerstation/containers
+LABEL org.opencontainers.image.description="Postfix Image, suitable for send-only mailserver"
+LABEL org.opencontainers.image.licenses=MIT
+
+RUN echo "postfix postfix/mailname string DOMAIN_PLACEHOLDER" | debconf-set-selections && \
+    echo "postfix postfix/main_mailer_type string 'Internet Site'" | debconf-set-selections && \
+    touch /var/log/mail.log && \
+    touch /var/log/mail.err && \
+    apt-get update && apt-get install -yq apt-utils && \
+    apt-get install -qy mailutils syslog-ng postfix-pcre sasl2-bin libsasl2-2 libsasl2-dev libsasl2-modules vim opendkim opendkim-tools supervisor && \
+    echo 'nameserver 8.8.8.8' > /var/spool/postfix/etc/resolv.conf
+
+RUN adduser noreply
+RUN adduser noreply sasl && adduser postfix sasl
+RUN adduser postfix opendkim
+
+RUN mkdir /etc/opendkim && \
+    chown opendkim:opendkim /etc/opendkim && \
+    chmod 750 /etc/opendkim
+    
+#CMD ["/bin/sh", "-c", "syslog-ng; tail -f /var/log/mail.log & tail -f /var/log/mail.err & postfix start-fg "]

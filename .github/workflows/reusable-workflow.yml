@@ -1,0 +1,48 @@
+name: build and push
+on:
+  workflow_call:
+    inputs:
+      name:
+        required: true
+        type: string
+      context-path:
+        required: true
+        type: string
+      dockerfile-path:
+        required: true
+        type: string
+
+
+jobs:
+  build-and-push:
+    runs-on: [self-hosted, gp_ubuntu]
+    name: build ${{ github.ref_name }}
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+      
+    - name: properties from ${{ inputs.image_directory }}
+      shell: bash
+      working-directory: ${{ inputs.image_directory }}
+      id: properties
+      run: |
+        echo "image=$(sed -n -e '/^image/ s/.*\: *//p'  ${{ inputs.dockerfile-path }}" >> $GITHUB_OUTPUT
+        echo "tag=$(sed -n -e '/^tag/ s/.*\: *//p' ${{ inputs.dockerfile-path }})" >> $GITHUB_OUTPUT
+        echo "repo=$(sed -n -e '/^repo/ s/.*\: *//p' ${{ inputs.dockerfile-path }})" >> $GITHUB_OUTPUT
+
+    - name: Log in to GitHub Packages
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ inputs.context-path }}
+        file: ${{ inputs.dockerfile-path }}
+        tags: ${{ steps.properties.outputs.repo }}/${{ steps.properties.outputs.image }}:${{ steps.properties.outputs.tag }}
+        push: true
+        outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=My multi-arch image

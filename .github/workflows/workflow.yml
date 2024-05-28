@@ -1,0 +1,17 @@
+name: build and push
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: 'read'
+
+jobs:
+  reusable_workflow_job:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: tinkerstation/containers/.github/workflows/reusable-workflow.yml@main
+      with:
+        name: postfix
+        context-path: "./postfix"
+        dockerfile-path: "./postfix/Containerfile"
+      secrets: inherit
