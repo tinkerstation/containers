@@ -2,16 +2,21 @@ name: ' '
 on:
   workflow_call:
     inputs:
-      name:
-        required: true
-        type: string
       context-path:
         required: true
         type: string
       dockerfile-path:
         required: true
         type: string
+      image:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
 
+env:
+  repo: ghcr.io/tinkerstation/containers
 
 jobs:
   build-and-push:
@@ -21,15 +26,6 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v4
-      
-    - name: properties from ${{ inputs.context-path }}
-      shell: bash
-      working-directory: ${{ inputs.context-path }}
-      id: properties
-      run: |
-        echo "image=$(sed -n -e '/^image/ s/.*\: *//p'  Containerfile)" >> $GITHUB_OUTPUT
-        echo "tag=$(sed -n -e '/^tag/ s/.*\: *//p' Containerfile)" >> $GITHUB_OUTPUT
-        echo "repo=$(sed -n -e '/^repo/ s/.*\: *//p' Containerfile)" >> $GITHUB_OUTPUT
 
     - name: Log in to GitHub Packages
       uses: docker/login-action@v3
@@ -40,5 +36,5 @@ jobs:
 
     - name: Build and Push Docker Image
       run: |
-        docker build ${{ inputs.context-path }} --tag ghcr.io/${{ steps.properties.outputs.repo }}/${{ steps.properties.outputs.image }}:${{ steps.properties.outputs.tag }} -f ${{ inputs.dockerfile-path }}
-        docker push ghcr.io/${{ steps.properties.outputs.repo }}/${{ steps.properties.outputs.image }}:${{ steps.properties.outputs.tag }}
+        docker build ${{ inputs.context-path }} --tag ${{ env.repo }}/${{ inputs.image }}:${{ inputs.tag }} -f ${{ inputs.dockerfile-path }}
+        docker push ${{ env.repo }}/${{ inputs.image }}:${{ inputs.tag }}

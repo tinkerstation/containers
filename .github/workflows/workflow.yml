@@ -9,7 +9,8 @@ jobs:
   postfix:
     uses: tinkerstation/containers/.github/workflows/reusable-workflow.yml@main
     with:
-      name: postfix
       context-path: "./postfix"
       dockerfile-path: "./postfix/Containerfile"
+      image: "postfix"
+      tag: "1.0.0-3.6.5"
     secrets: inherit
