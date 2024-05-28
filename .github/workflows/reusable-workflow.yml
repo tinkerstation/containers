@@ -1,4 +1,4 @@
-name: build and push
+name: ' '
 on:
   workflow_call:
     inputs:
